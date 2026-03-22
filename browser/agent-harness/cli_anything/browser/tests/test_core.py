@@ -155,8 +155,8 @@ class TestPageModule:
         sess.set_url("https://first.com")
         sess.set_url("https://second.com")
 
-        with patch("cli_anything.browser.core.page.backend.open_url") as mock_open:
-            mock_open.return_value = {"url": "https://first.com", "status": "loaded"}
+        with patch("cli_anything.browser.core.page.backend.back") as mock_back:
+            mock_back.return_value = {"url": "https://first.com", "status": "navigated"}
 
             result = page.go_back(sess)
 
@@ -167,8 +167,11 @@ class TestPageModule:
         """Going back with empty history returns error."""
         sess = Session()
 
-        result = page.go_back(sess)
-        assert "error" in result
+        with patch("cli_anything.browser.core.page.backend.back") as mock_back:
+            mock_back.return_value = {"error": "No history"}
+
+            result = page.go_back(sess)
+            assert "error" in result
 
     def test_go_forward_updates_session(self):
         """Going forward updates session and calls backend."""
@@ -177,8 +180,8 @@ class TestPageModule:
         sess.set_url("https://second.com")
         sess.go_back()  # Now at first.com
 
-        with patch("cli_anything.browser.core.page.backend.open_url") as mock_open:
-            mock_open.return_value = {"url": "https://second.com", "status": "loaded"}
+        with patch("cli_anything.browser.core.page.backend.forward") as mock_forward:
+            mock_forward.return_value = {"url": "https://second.com", "status": "navigated"}
 
             result = page.go_forward(sess)
 
